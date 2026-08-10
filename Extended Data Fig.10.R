@@ -1,5 +1,5 @@
 ############################################################
-#  Figure S7  Kaplan–Meier DFS curves by CMSPlus subtype
+#  Kaplan–Meier DFS curves by CMSPlus subtype
 #
 #  Instructions:
 #  1. Choose dataset:
