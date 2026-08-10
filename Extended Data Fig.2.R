@@ -1,4 +1,3 @@
-### FigureS2
 # heatmap
 load("/mnt/wutan/data/9.CMSPlus/Figure1/gsva.all.42.RData")
 load("/mnt/wutan/data/9.CMSPlus/code/basement/CRCSC.expression.clindata.RData")
