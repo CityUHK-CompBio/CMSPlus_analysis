@@ -1,4 +1,4 @@
-### Figure1A
+### Figure1a
 library(ComplexHeatmap)
 library(circlize)
 load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230514/model/intoeder.RData")
@@ -35,62 +35,102 @@ PPCRCSC3 <- Heatmap(gsvaall2[16:42, ], col = col_fun2, cluster_rows = FALSE, clu
 ht_list = PPCRCSC2%v%PPCRCSC3
 draw(ht_list)
 
-# Figure1C
-load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/3.differential/immune/A3EstimateScores.RData")
-CMSclinallE <- merge(CMSclin2, A3EstimateScores, by.x="sample", by.y="row.names")
-CMSPlusSubtype=c(CMS1='#E69F24',CMS2='#0273B3', CMS3='#CC79A7', 'CMS4-TME+'='#3C5488', 'CMS4-TME-'='#8491B4')
-### Stromal Score
-bpc1p<-formatC(t.test(CMSclinallE$StromalScore[which(CMSclinallE$CMSTME %in% "CMS4-TME+")], CMSclinallE$StromalScore[which(CMSclinallE$CMSTME %in% "CMS4-TME-")])$p.value, format = "e", digits = 2)
-my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
-bpc1 <- ggplot(CMSclinallE, aes(x=CMSTME, y=StromalScore, fill=CMSTME)) + geom_boxplot(width=0.8) + 
-      labs(title="CRC Stromal Score",x="Subtype", y = "Stromal Score") + 
-      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-      geom_signif(comparisons=my_comparisons, annotations=c(bpc1p), y_position = c(1800), tip_length = 0, vjust=0)
-### Immune Score
-bpc2p<-formatC(t.test(CMSclinallE$ImmuneScore[which(CMSclinallE$CMSTME %in% "CMS4-TME+")], CMSclinallE$ImmuneScore[which(CMSclinallE$CMSTME %in% "CMS4-TME-")])$p.value, format = "e", digits = 2)
-my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
-bpc2 <- ggplot(CMSclinallE, aes(x=CMSTME, y=ImmuneScore, fill=CMSTME)) + geom_boxplot(width=0.8) + 
-      labs(title="CRC Immune Score",x="Subtype", y = "Immune Score") + 
-      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-      geom_signif(comparisons=my_comparisons, annotations=c(bpc2p), y_position = c(2400), tip_length = 0, vjust=0)
-### Tumor purity
-bpc3p<-formatC(t.test(CMSclinallE$TumourPurity[which(CMSclinallE$CMSTME %in% "CMS4-TME+")], CMSclinallE$TumourPurity[which(CMSclinallE$CMSTME %in% "CMS4-TME-")])$p.value, format = "e", digits = 2)
-my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
-bpc3 <- ggplot(CMSclinallE, aes(x=CMSTME, y=TumourPurity, fill=CMSTME)) + geom_boxplot(width=0.8) + 
-      labs(title="CRC Tumor Purity",x="Subtype", y = "Tumor Purity") + 
-      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-      geom_signif(comparisons=my_comparisons, annotations=c(bpc3p), y_position = c(0.9), tip_length = 0, vjust=0)
-figure <- ggarrange(bpc1, bpc2, bpc3,
-                    labels = c("A", "B", "C"),
-                    ncol = 3, nrow = 1)
-figure
-
-# Figure1D
-setwd("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/3.differential/immune")
-load("/data0/tan/Task/9.CMS.SDI/data/5.PublicExpSurData/CRCSC/CRCSC.expression.clindata.RData")  ## expall.corr, clindata
-load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CMSclin2.gsvaall2.RData")
+# Figure1b
+library(EPIC)
+setwd("/mnt/wutan/data/9.CMSPlus/data")
+load("CMSclin2.gsvaall2.RData")
+load("CRCSC.expression.clindata.RData")
 expcrctcga <- expall.corr[, CMSclin2$sample]
-library(MCPcounter)
-library(ggplot2)
-CRCMCP <- MCPcounter.estimate(expcrctcga, featuresType='HUGO_symbols')
-CRCMCP.pst <- PST(as.matrix(CRCMCP))
-CRCMCP.pst <- data.frame(ImmuneInfiltration=CRCMCP.pst[, 1], Sample=CRCMCP.pst[, 2], Score=as.numeric(CRCMCP.pst[, 3]))
-CRCMCP.pst$`CMSPlus` <- CMSclinall$CMSTME[match(CRCMCP.pst$Sample, CMSclinall$sample)]
-#
-anno_CRCMCP <- compare_means(Score ~ CMSPlus, method="t.test", group.by = "ImmuneInfiltration", data = CRCMCP.pst, p.adjust.method = "BH") %>%
- mutate(y_pos = 12.5, p.adj = format.pval(p.adj, digits = 2))
-anno_CRCMCP <- anno_CRCMCP[anno_CRCMCP$group1 %in% c("CMS4-TME+", "CMS4-TME-") & anno_CRCMCP$group2 %in% c("CMS4-TME+", "CMS4-TME-"), ]
+out <- EPIC(bulk = expcrctcga)
+CRCEPIC.pst <- PST(as.matrix(out$cellFractions))
+CRCEPIC.pst <- data.frame(Sample=CRCEPIC.pst[, 1], ImmuneInfiltration=CRCEPIC.pst[, 2], Score=as.numeric(CRCEPIC.pst[, 3]))
+CRCEPIC.pst$CMSPlus <- CMSclin2$NewCluster[match(CRCEPIC.pst$Sample, CMSclin2$sample)]
+CRCEPIC.pst$CMSPlus <- gsub("CMS4_LowIF", "CMS4-TME-", CRCEPIC.pst$CMSPlus)
+CRCEPIC.pst$CMSPlus <- gsub("CMS4_HighIF", "CMS4-TME+", CRCEPIC.pst$CMSPlus)
+anno_CRCEPIC <- compare_means(Score ~ CMSPlus, method="wilcox.test", group.by = "ImmuneInfiltration", data = CRCEPIC.pst, p.adjust.method = "BH") %>%
+ mutate(y_pos = 0.25, p.adj = format.pval(p.adj, digits = 2))
+anno_CRCEPIC <- anno_CRCEPIC[anno_CRCEPIC$group1 %in% c("CMS4-TME+", "CMS4-TME-") & anno_CRCEPIC$group2 %in% c("CMS4-TME+", "CMS4-TME-"), ]
 CMSPlusSubtype=c(CMS1='#E69F24',CMS2='#0273B3', CMS3='#CC79A7', 'CMS4-TME+'='#3C5488', 'CMS4-TME-'='#8491B4')
-#
-ggboxplot(CRCMCP.pst, x = "CMSPlus", y = "Score", fill="CMSPlus", ggtheme = theme_bw(), palette=CMSPlusSubtype) +
-  facet_wrap(~ImmuneInfiltration, ncol = 5) + 
-  geom_signif(
-    data=anno_CRCMCP, 
-    aes(xmin = group1, xmax = group2, annotations = formatC(p, format = "e", digits = 2), y_position = y_pos), 
-    manual= TRUE
-  )+ theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust=1))
+CRCEPIC.pst$CMSPlus <- factor(CRCEPIC.pst$CMSPlus, levels=c("CMS1", "CMS2", "CMS3", "CMS4-TME+", "CMS4-TME-"))
+ggboxplot(CRCEPIC.pst, x = "CMSPlus", y = "Score", fill = "CMSPlus",
+          ggtheme = theme_bw(), palette = CMSPlusSubtype,
+          outlier.shape = NA) +
+  facet_wrap(~ImmuneInfiltration, ncol = 5, scales = "free_y") +
+  stat_compare_means(
+    comparisons = list(c("CMS4-TME+", "CMS4-TME-")),
+    method = "wilcox.test",
+    label = "p.format"
+  ) +
+  theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
 
-# Figure1E
+# Figure1c
+p <- as.data.frame(t(out$cellFractions))
+shannon <- apply(p, 2, function(x) {
+  x <- x[x > 0]  # 移除 0，避免 log(0)
+  if (length(x) == 0) return(0)
+  -sum(x * log(x))
+})
+# Pielou's evenness：标准化到 [0,1]
+n_features <- nrow(gsvaall2)
+evenness <- shannon / log(n_features)
+tme_entropy <- data.frame(
+  sample = colnames(gsvaall2),
+  shannon = shannon,
+  evenness = evenness
+)
+identical(tme_entropy$sample, CMSclin2$sample)
+tme_entropy$NewCluster <- CMSclin2$NewCluster
+my_comparisons = list( c("CMS4_HighIF", "CMS4_LowIF"), c("CMS4_HighIF", "CMS1"), c("CMS4_HighIF", "CMS2"), c("CMS4_HighIF", "CMS3"), c("CMS1", "CMS4_LowIF"), c("CMS2", "CMS4_LowIF"), c("CMS3", "CMS4_LowIF") )
+bpc3 <- ggplot(tme_entropy, aes(x=NewCluster, y=shannon, fill=NewCluster)) + geom_boxplot(width=0.8, outlier.shape = NA) + 
+      labs(title="Shannon entropy",x="Subtype", y = "Shannon entropy") + 
+      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+      geom_signif(comparisons=my_comparisons, test = "wilcox.test", step_increase = .1, tip_length = 0, vjust=0)
+
+# Figure1d
+library(maftools)
+load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.exp.he_v2.RData")
+TCGAclindata <- CRC.clin.exp.he_v2
+TCGAclindata$Tumor_Sample_Barcode <- CRC.clin.exp.he_v2$sample
+CRCMaf <- read.maf(maf = "/data/home2/wutan/Task/9.CMS.SDI/Procedures/StartFrom20210310/CRC_maftools.maf", clinicalData = TCGAclindata, verbose = FALSE, isTCGA = TRUE)
+CRCMaf.subtype = clinicalEnrichment(maf = CRCMaf, clinicalFeature = 'CMSPlus')
+CMSPlusSubtype=c(CMS1='#E69F24',CMS2='#0273B3', CMS3='#CC79A7', 'CMS4-TME+'='#3C5488', 'CMS4-TME-'='#8491B4')
+MutationCountSample <- table(CRCMaf@data$Tumor_Sample_Barcode)
+MutationCountDF <- data.frame(Sample=names(MutationCountSample), MutationCount=as.numeric(MutationCountSample), Subtype=TCGAclindata$CMSPlus[match(names(MutationCountSample), TCGAclindata$Tumor_Sample_Barcode)])
+t.test(MutationCountDF$MutationCount[which(MutationCountDF$Subtype %in% "CMS4-TME+")], MutationCountDF$MutationCount[which(MutationCountDF$Subtype %in% "CMS4-TME-")])
+# p-value = 0.01493
+my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
+MutationCountDF <- MutationCountDF[!is.na(MutationCountDF$Subtype), ]
+bp1 <- ggplot(MutationCountDF, aes(x=Subtype, y=MutationCount, fill=Subtype)) + geom_boxplot(width=0.8) + 
+      labs(x="Subtype", y = "Mutation Count") + 
+      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + scale_y_continuous(limits = c(0, 1500)) +
+      geom_signif(comparisons=my_comparisons, annotations=c("1.49e-02"), y_position = c(700), tip_length = 0, vjust=0)
+
+# Figure1e
+load("/data/home2/wutan/Task/MultiomicsSubtyping/data/TCGAbiolinks/data/CRCGistic.rda")
+load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.exp.he_v2.RData")
+TCGAclindata <- CRC.clin.exp.he_v2
+TCGAclindata$Tumor_Sample_Barcode <- CRC.clin.exp.he_v2$sample
+thresholedbygene <- gistic.thresholedbygene[, -(1:3)]
+rownames(thresholedbygene) <- gistic.thresholedbygene[, 1]
+thresholedbygene <- thresholedbygene[, grep("01", substr(colnames(thresholedbygene), 14, 15))]
+colnames(thresholedbygene) <- substr(colnames(thresholedbygene), 1, 12)
+colnames(thresholedbygene) <- gsub("\\.", "-", colnames(thresholedbygene))
+for(i in 1:length(colnames(thresholedbygene))){
+	thresholedbygene[, i] <- as.numeric(thresholedbygene[, i])
+}
+copynumberload <- apply(thresholedbygene, 2, function(x) sum(abs(x)))
+SCNACountDF <- data.frame(Sample=names(copynumberload), SCNACount=as.numeric(copynumberload), Subtype=TCGAclindata$CMSPlus[match(names(copynumberload), TCGAclindata$Tumor_Sample_Barcode)])
+##
+t.test(SCNACountDF$SCNACount[which(SCNACountDF$Subtype %in% "CMS4-TME+")], SCNACountDF$SCNACount[which(SCNACountDF$Subtype %in% "CMS4-TME-")])
+# p-value = 0.04313
+my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
+SCNACountDF <- SCNACountDF[!is.na(SCNACountDF$Subtype), ]
+bp2 <- ggplot(SCNACountDF, aes(x=Subtype, y=SCNACount, fill=Subtype)) + geom_boxplot(width=0.8) + 
+      labs(x="Subtype", y = "SCNA Count") + 
+      scale_fill_manual(values=CMSTMESubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + scale_y_continuous(limits = c(0, 25000)) +
+      geom_signif(comparisons=my_comparisons, annotations=c("4.31e-02"), y_position = c(23000), tip_length = 0, vjust=0)
+
+# Figure1f
 setwd("/mnt/wutan/data/9.CMSPlus/Figure3/model")
 load("CMSclin2.gsvaall2.RData")
 load("CRC.clin.exp.he_v2.RData")
