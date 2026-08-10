@@ -1,5 +1,5 @@
 ############################################################
-#  Figure 5G and Figure 5J  Kaplan–Meier DFS curves
+#  Figure 6G and Figure 6H  Kaplan–Meier DFS curves
 #
 #  Instructions:
 #  1. Choose dataset:
@@ -8,8 +8,8 @@
 #       file_path <- "table/Liaoning_CT_info.xlsx"
 #
 #  2. Set figure title:
-#       figure_title <- "SYSU-CT Cohort"      # for Figure 5G
-#       figure_title <- "Liaoning-CT Cohort"  # for Figure 5J
+#       figure_title <- "SYSU-CT Cohort"      # for Figure 6G
+#       figure_title <- "Liaoning-CT Cohort"  # for Figure 6H
 #
 #  Output includes survival curve + risk table,
 #  saved as PNG / PDF in folder "img_plot/".
