@@ -1,5 +1,5 @@
 ############################################################
-#  Figure 5H to Figure 5L  Kaplan–Meier DFS curves
+#  Figure 6i to Figure 6l  Kaplan–Meier DFS curves
 #  Chemotherapy benefit analysis by CMS4 subtype
 #
 #  Instructions:
@@ -9,8 +9,8 @@
 #       file_path <- "table/Liaoning_CT_info.xlsx"
 #
 #  2. Choose subtype:
-#       subtype <- "CMS4-TME+"   # for Figure 5H (SYSU-CT) or Figure 5K (Liaoning-CT)
-#       subtype <- "CMS4-TME-"   # for Figure 5I (SYSU-CT) or Figure 5L (Liaoning-CT)
+#       subtype <- "CMS4-TME+"   # for Figure 6i (SYSU-CT) or Figure 6j (Liaoning-CT)
+#       subtype <- "CMS4-TME-"   # for Figure 6k (SYSU-CT) or Figure 6l (Liaoning-CT)
 #
 #  Figure titles are generated automatically,
 #  and outputs (curve + risk table) are saved
