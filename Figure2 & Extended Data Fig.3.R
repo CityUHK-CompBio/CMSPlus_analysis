@@ -1,4 +1,34 @@
-####### Figure2A
+## Extended Data Fig.3a
+load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/3.differential/immune/A3EstimateScores.RData")
+CMSclinallE <- merge(CMSclin2, A3EstimateScores, by.x="sample", by.y="row.names")
+CMSPlusSubtype=c(CMS1='#E69F24',CMS2='#0273B3', CMS3='#CC79A7', 'CMS4-TME+'='#3C5488', 'CMS4-TME-'='#8491B4')
+### Stromal Score
+bpc1p<-formatC(t.test(CMSclinallE$StromalScore[which(CMSclinallE$CMSTME %in% "CMS4-TME+")], CMSclinallE$StromalScore[which(CMSclinallE$CMSTME %in% "CMS4-TME-")])$p.value, format = "e", digits = 2)
+my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
+bpc1 <- ggplot(CMSclinallE, aes(x=CMSTME, y=StromalScore, fill=CMSTME)) + geom_boxplot(width=0.8) + 
+      labs(title="CRC Stromal Score",x="Subtype", y = "Stromal Score") + 
+      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+      geom_signif(comparisons=my_comparisons, annotations=c(bpc1p), y_position = c(1800), tip_length = 0, vjust=0)
+### Immune Score
+bpc2p<-formatC(t.test(CMSclinallE$ImmuneScore[which(CMSclinallE$CMSTME %in% "CMS4-TME+")], CMSclinallE$ImmuneScore[which(CMSclinallE$CMSTME %in% "CMS4-TME-")])$p.value, format = "e", digits = 2)
+my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
+bpc2 <- ggplot(CMSclinallE, aes(x=CMSTME, y=ImmuneScore, fill=CMSTME)) + geom_boxplot(width=0.8) + 
+      labs(title="CRC Immune Score",x="Subtype", y = "Immune Score") + 
+      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+      geom_signif(comparisons=my_comparisons, annotations=c(bpc2p), y_position = c(2400), tip_length = 0, vjust=0)
+### Tumor purity
+bpc3p<-formatC(t.test(CMSclinallE$TumourPurity[which(CMSclinallE$CMSTME %in% "CMS4-TME+")], CMSclinallE$TumourPurity[which(CMSclinallE$CMSTME %in% "CMS4-TME-")])$p.value, format = "e", digits = 2)
+my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
+bpc3 <- ggplot(CMSclinallE, aes(x=CMSTME, y=TumourPurity, fill=CMSTME)) + geom_boxplot(width=0.8) + 
+      labs(title="CRC Tumor Purity",x="Subtype", y = "Tumor Purity") + 
+      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+      geom_signif(comparisons=my_comparisons, annotations=c(bpc3p), y_position = c(0.9), tip_length = 0, vjust=0)
+figure <- ggarrange(bpc1, bpc2, bpc3,
+                    labels = c("A", "B", "C"),
+                    ncol = 3, nrow = 1)
+figure
+
+## Extended Data Fig.3b
 options(stringsAsFactors=FALSE)
 setwd("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/3.differential/exp")
 library(HTSanalyzeR2)
@@ -23,7 +53,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
   rownames(Signature.heat) <- c("Epithelial", "WNT targets", "MYC targets", "Mesenchymal",
                                 "EMT activation", "TGF-beta activation",
                                 "Matrix remodeling", "Wound response", "Cancer stem cell")
-  ## Pathways.heat
+  ### Pathways.heat
   Pathways.heat <- heat.dat[match(c("MAPK_KEGG",
                                     "PI3K_ACT_REACTOME",
                                     "SRC_ACT_BILD",
@@ -38,12 +68,12 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                                "JAK-STAT", "Caspases", "Proteosome", "Cell cycle",
                                "Translation ribosome", "Integrin-beta3", "VEGF VEGFR")
   
-  ## Estimate.heat
+  ### Estimate.heat
   Estimate.heat <- heat.dat[match(c("IMMUNE_ESTIMATE",
                                     "STROMAL_ESTIMATE"), rownames(heat.dat)), ]
   rownames(Estimate.heat) <- c("Immune infiltration", "Stromal infiltration")
   
-  ## Immune.heat
+  ### Immune.heat
   Immune.heat <- heat.dat[match(c("IMMUNE_RESP_GO_BP",
                                   "PD1_REACTOME",
                                   "IMMUNE_NKC_BREAST",
@@ -57,7 +87,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                              "TH1 infiltration","TFH infiltration", "TH17 activation",
                              "Treg activation", "Complement activation")
   
-  ## Metabolism.heat
+  ### Metabolism.heat
   Metabolism.heat <- heat.dat[match(c("AMINO_SUGAR_NUCLEO_METAB_KEGG",
                                       "PENTOSE_GLUC_METAB_KEGG",
                                       "FRUTOSE_MANNOSE_METAB_KEGG",
@@ -74,16 +104,15 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
   if(cancerintrinsic == TRUE){
     Intrinsic.heat <- heat.dat[match(c("CRIS", "Eschrich", "Jorissen", "Kennedy", "PDAC", "Popovici", "Sadanandam", "The_30_gene"), rownames(heat.dat)), ]
   }
-  ## pheatmap
+  ### pheatmap
   library(pheatmap)
   col.annotation <- data.frame("group" = colnames(heat.dat),
                                "Subtype" = colnames(heat.dat))
   annotation_col <- data.frame("Subtype" = as.factor(col.annotation$Subtype))
   rownames(annotation_col) <- colnames(Metabolism.heat)
   ann_colors = labelcolors
-  ## Signature.heatmap
-  #breaks <- c(seq(-4, 4, length.out = 100))
-  #breaks <- c(seq(-4, -1.5, length.out = 10), seq(-1.49, 0, length.out = 40), seq(0.01, 1.5, length.out = 40), seq(1.51, 4, length.out = 10))
+  ### Signature.heatmap
+  breaks <- c(seq(-4, 4, length.out = 100))
   Signature.p <- pheatmap(Signature.heat,
                           filename = "Signature.pdf",
                           fontsize =10, breaks = breaks,
@@ -94,7 +123,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                           cluster_cols =F,cluster_rows=F,fontsize_col=12,
                           cellwidth = 15,cellheight=15,
                           main = "Signatures")
-  ## Pathways.heatmap
+  ### Pathways.heatmap
   Pathways.p <- pheatmap(Pathways.heat,
                          filename = "Pathways.pdf",
                          fontsize =10, breaks = breaks,
@@ -106,7 +135,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                          cellwidth = 15,cellheight=15,
                          legend = F, annotation_legend = F,
                          main = "Pathways")
-  ## Estimate.heatmap
+  ### Estimate.heatmap
   Estimate.p <- pheatmap(Estimate.heat,
                          filename = "Estimate.pdf",
                          fontsize =10, breaks = breaks,
@@ -118,7 +147,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                          cellwidth = 15,cellheight=15,
                          legend = F, annotation_legend = F,
                          main = "Estimate")
-  ## Immune.heatmap
+  ### Immune.heatmap
   Immune.p <- pheatmap(Immune.heat,
                        filename = "Immune.pdf",
                        fontsize =10, breaks = breaks,
@@ -131,8 +160,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                        legend = F, annotation_legend = F,
                        main = "Immune")
   
-  ## Metabolism.heatmap
-  # breaks <- c(seq(-5, 5, length.out = 100))
+  ### Metabolism.heatmap
   Metabolism.p <- pheatmap(Metabolism.heat,
                            filename = "Metabolism.pdf",
                            fontsize =10, breaks = breaks,
@@ -146,7 +174,7 @@ CCSEnrichmentHeatmapRename <- function(heat.dat, labelcolors, cancerintrinsic=FA
                            main = "Metabolism")
   save(Signature.p, Pathways.p, Immune.p, Metabolism.p, Estimate.p,
        file = "Figure.RData")
-  ## cancer intrinsic
+  ### cancer intrinsic
   if(cancerintrinsic == TRUE){
     Intrinsic.p <- pheatmap(Intrinsic.heat,
                             filename = "Intrinsic.pdf",
@@ -176,55 +204,7 @@ pdf("pathway.pdf", height = 9.1, width = 10)
 	          nrow = 2, align = "none")
 	dev.off()
 
-
-####### Figure2B
-library(maftools)
-load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.exp.he_v2.RData")
-TCGAclindata <- CRC.clin.exp.he_v2
-TCGAclindata$Tumor_Sample_Barcode <- CRC.clin.exp.he_v2$sample
-CRCMaf <- read.maf(maf = "/data/home2/wutan/Task/9.CMS.SDI/Procedures/StartFrom20210310/CRC_maftools.maf", clinicalData = TCGAclindata, verbose = FALSE, isTCGA = TRUE)
-CRCMaf.subtype = clinicalEnrichment(maf = CRCMaf, clinicalFeature = 'CMSPlus')
-CMSPlusSubtype=c(CMS1='#E69F24',CMS2='#0273B3', CMS3='#CC79A7', 'CMS4-TME+'='#3C5488', 'CMS4-TME-'='#8491B4')
-MutationCountSample <- table(CRCMaf@data$Tumor_Sample_Barcode)
-MutationCountDF <- data.frame(Sample=names(MutationCountSample), MutationCount=as.numeric(MutationCountSample), Subtype=TCGAclindata$CMSPlus[match(names(MutationCountSample), TCGAclindata$Tumor_Sample_Barcode)])
-##
-t.test(MutationCountDF$MutationCount[which(MutationCountDF$Subtype %in% "CMS4-TME+")], MutationCountDF$MutationCount[which(MutationCountDF$Subtype %in% "CMS4-TME-")])
-# p-value = 0.01493
-my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
-MutationCountDF <- MutationCountDF[!is.na(MutationCountDF$Subtype), ]
-bp1 <- ggplot(MutationCountDF, aes(x=Subtype, y=MutationCount, fill=Subtype)) + geom_boxplot(width=0.8) + 
-      labs(x="Subtype", y = "Mutation Count") + 
-      scale_fill_manual(values=CMSPlusSubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + scale_y_continuous(limits = c(0, 1500)) +
-      geom_signif(comparisons=my_comparisons, annotations=c("1.49e-02"), y_position = c(700), tip_length = 0, vjust=0)
-
-
-####### Figure2C
-load("/data/home2/wutan/Task/MultiomicsSubtyping/data/TCGAbiolinks/data/CRCGistic.rda")
-load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.exp.he_v2.RData")
-TCGAclindata <- CRC.clin.exp.he_v2
-TCGAclindata$Tumor_Sample_Barcode <- CRC.clin.exp.he_v2$sample
-thresholedbygene <- gistic.thresholedbygene[, -(1:3)]
-rownames(thresholedbygene) <- gistic.thresholedbygene[, 1]
-thresholedbygene <- thresholedbygene[, grep("01", substr(colnames(thresholedbygene), 14, 15))]
-colnames(thresholedbygene) <- substr(colnames(thresholedbygene), 1, 12)
-colnames(thresholedbygene) <- gsub("\\.", "-", colnames(thresholedbygene))
-for(i in 1:length(colnames(thresholedbygene))){
-	thresholedbygene[, i] <- as.numeric(thresholedbygene[, i])
-}
-copynumberload <- apply(thresholedbygene, 2, function(x) sum(abs(x)))
-SCNACountDF <- data.frame(Sample=names(copynumberload), SCNACount=as.numeric(copynumberload), Subtype=TCGAclindata$CMSPlus[match(names(copynumberload), TCGAclindata$Tumor_Sample_Barcode)])
-##
-t.test(SCNACountDF$SCNACount[which(SCNACountDF$Subtype %in% "CMS4-TME+")], SCNACountDF$SCNACount[which(SCNACountDF$Subtype %in% "CMS4-TME-")])
-# p-value = 0.04313
-my_comparisons = list( c("CMS4-TME+", "CMS4-TME-") )
-SCNACountDF <- SCNACountDF[!is.na(SCNACountDF$Subtype), ]
-bp2 <- ggplot(SCNACountDF, aes(x=Subtype, y=SCNACount, fill=Subtype)) + geom_boxplot(width=0.8) + 
-      labs(x="Subtype", y = "SCNA Count") + 
-      scale_fill_manual(values=CMSTMESubtype) + theme_bw() + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + scale_y_continuous(limits = c(0, 25000)) +
-      geom_signif(comparisons=my_comparisons, annotations=c("4.31e-02"), y_position = c(23000), tip_length = 0, vjust=0)
-
-
-####### Figure2D
+####### Extended Data fig.3c
 load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CMSclin2.gsvaall2.RData")
 # age
 CMSclin2$Age <- "50-"
@@ -240,9 +220,7 @@ age1.1box <- as.data.frame(table(CMSclin2$CMSTME, CMSclin2$Age))
 pp1 <- ggplot(age1.1box, aes(fill=Var2, y=Freq, x=Var1)) + 
     geom_bar(position="fill", stat="identity", width=0.5) + scale_fill_manual(values=c("#1E8BA9", "#FECB24", "#DA1F27", "#704122")) + 
 		xlab("Subtype") + ylab("Percentage") + labs(fill = "Age") + ggtitle("p-value = 0.0005") + theme(axis.text.x=element_text(angle=60,hjust=1)) 
-
 # Gender 
-
 fisher.test(table(CMSclin2$CMSTME, CMSclin2$gender), workspace = 2e7, simulate.p.value=TRUE)
 CMSclin2_CMS4 <- CMSclin2[grep("CMS4", CMSclin2$CMSTME), ]
 fisher.test(table(CMSclin2_CMS4$CMSTME, CMSclin2_CMS4$gender), workspace = 2e7, simulate.p.value=TRUE)
@@ -251,9 +229,7 @@ Gender1.1box <- as.data.frame(table(CMSclin2$CMSTME, CMSclin2$gender))
 pp2 <- ggplot(Gender1.1box, aes(fill=Var2, y=Freq, x=Var1)) + 
     geom_bar(position="fill", stat="identity", width=0.5) + scale_fill_manual(values=c("#E69F00", "#56B4E9")) + 
 		xlab("Subtype") + ylab("Percentage") + labs(fill = "Gender") + ggtitle("p-value = 0.005") + theme(axis.text.x=element_text(angle=60,hjust=1))
-
 # Stage
-
 fisher.test(table(CMSclin2$CMSTME, CMSclin2$stage), workspace = 2e7, simulate.p.value=TRUE)
 CMSclin2_CMS4 <- CMSclin2[grep("CMS4", CMSclin2$CMSTME), ]
 fisher.test(table(CMSclin2_CMS4$CMSTME, CMSclin2_CMS4$stage), workspace = 2e7, simulate.p.value=TRUE)
@@ -262,7 +238,6 @@ TumorLocation11.1box <- as.data.frame(table(CMSclin2$CMSTME, CMSclin2$stage))
 pp4 <- ggplot(TumorLocation11.1box, aes(fill=Var2, y=Freq, x=Var1)) + 
     geom_bar(position="fill", stat="identity", width=0.5) + scale_fill_manual(values=c("1"=RColorBrewer::brewer.pal(9, "YlGn")[2], "2"=RColorBrewer::brewer.pal(9, "YlGn")[4], "3"=RColorBrewer::brewer.pal(9, "YlGn")[6], "4"=RColorBrewer::brewer.pal(9, "YlGn")[8])) + 
 		xlab("Subtype") + ylab("Percentage") + labs(fill = "Stage") + ggtitle("p-value = 0.0005") + theme(axis.text.x=element_text(angle=60,hjust=1)) 
-
 # tnm
 CMSclin2$TNM <- CMSclin2$tnm
 CMSclin2$TNM <- gsub("A", "", CMSclin2$TNM)
@@ -270,7 +245,6 @@ CMSclin2$TNM <- gsub("B", "", CMSclin2$TNM)
 CMSclin2$TNM <- gsub("C", "", CMSclin2$TNM)
 CMSclin2$TNM <- gsub("/II", "", CMSclin2$TNM)
 table(CMSclin2$TNM, useNA="always")
-
 # pn
 fisher.test(table(CMSclin2$CMSTME, CMSclin2$pn), workspace = 2e7, simulate.p.value=TRUE)
 CMSclin2_CMS4 <- CMSclin2[grep("CMS4", CMSclin2$CMSTME), ]
@@ -280,7 +254,6 @@ TNM1.1box <- as.data.frame(table(CMSclin2$CMSTME, CMSclin2$pn))
 ppn1 <- ggplot(TNM1.1box, aes(fill=Var2, y=Freq, x=Var1)) + 
     geom_bar(position="fill", stat="identity", width=0.5) + scale_fill_manual(values=c('0'='#E2E2E2','1'=RColorBrewer::brewer.pal(10, "Paired")[2])) + 
 		xlab("Subtype") + ylab("Percentage") + labs(fill = "pn") + ggtitle("p-value = 0.0005") + theme(axis.text.x=element_text(angle=60,hjust=1)) 
-
 # pm
 fisher.test(table(CMSclin2$CMSTME, CMSclin2$pm), workspace = 2e7, simulate.p.value=TRUE)
 CMSclin2_CMS4 <- CMSclin2[grep("CMS4", CMSclin2$CMSTME), ]
@@ -290,14 +263,11 @@ TNM1.1box <- as.data.frame(table(CMSclin2$CMSTME, CMSclin2$pm))
 ppm1 <- ggplot(TNM1.1box, aes(fill=Var2, y=Freq, x=Var1)) + 
     geom_bar(position="fill", stat="identity", width=0.5) + scale_fill_manual(values=c('0'='#E2E2E2','1'=RColorBrewer::brewer.pal(12, "Paired")[12])) + 
 		xlab("Subtype") + ylab("Percentage") + labs(fill = "pm") + ggtitle("p-value = 0.0005") + theme(axis.text.x=element_text(angle=60,hjust=1))
-
 # Location
-
 load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.exp.he_v2.RData")
 ccc <- CRC.clin.exp.he_v2
 colnames(ccc)[colnames(ccc) %in% "Immune.Subtype"] <- "Subtype"
 colnames(ccc)[colnames(ccc) %in% "tumor.location"] <- "TumorLocation"
-
 fisher.test(table(ccc$Subtype, ccc$TumorLocation), workspace = 2e7, simulate.p.value=TRUE)
 ccc_CMS4 <- ccc[grep("CMS4", ccc$Subtype), ]
 fisher.test(table(ccc_CMS4$Subtype, ccc_CMS4$TumorLocation), workspace = 2e7, simulate.p.value=TRUE)
@@ -306,29 +276,28 @@ TumorLocation11.1box <- as.data.frame(table(ccc$Subtype, ccc$TumorLocation))
 pp5 <- ggplot(TumorLocation11.1box, aes(fill=Var2, y=Freq, x=Var1)) + 
     geom_bar(position="fill", stat="identity", width=0.5) + scale_fill_manual(values=RColorBrewer::brewer.pal(4, "Dark2")[3:4]) + 
 		xlab("Subtype") + ylab("Percentage") + labs(fill = "Tumor Location") + ggtitle("p-value = 0.0005") + theme(axis.text.x=element_text(angle=60,hjust=1)) 
-
 figure <- ggarrange(pp1, pp2, pp4, pp5, ppn1, ppm1,
                     labels = c("A", "B", "C", "D", "E", "F", "G"),
                     ncol = 4, nrow = 2)
 figure
 
-####### Figure2E & FigureS3
-
+## Figure2a & Figure2e & Extended Data Fig.3e
 load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.exp.he_v2.RData")
 setwd("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/5.otherclassifier")
 CRIStcga <- read.table("CRIS.label.txt", header=T, sep="\t", quote="", fill=T)  ## download from paper
 CRC.clin.exp.he_v2$CRIS.TSP <- CRIStcga$CRIS.TSP.Class.assignment[match(CRC.clin.exp.he_v2$sample, CRIStcga$Sample.ID)]
 CRC.clin.exp.he_v2$CRIS.NTP80 <- CRIStcga$CRIS.NTP80.Class.Assignment[match(CRC.clin.exp.he_v2$sample, CRIStcga$Sample.ID)]
 clin3 <- CRC.clin.exp.he_v2[!is.na(CRC.clin.exp.he_v2$CRIS.TSP) & CRC.clin.exp.he_v2$CRIS.TSP != "", ]
-
-### FigureS3
+### Figure2e
 library(survival)
 library(gfplots)
 source("~/R/functions/functions.R")
 cmssdirfs <- SurvivalFGPlotSimplify(clin3, "rfs.delay", "rfs.event", "CRIS.TSP", Color=c("#EF4C2A", "#D42127", "#1C275C", "#018647", "#00AD9B"), type="months")
 plot_KMCurve(cmssdirfs$clin, cmssdirfs$labs, color=cmssdirfs$Color, font="Helvetica", xlab = "Follow-up (Months)", ylab = paste(cmssdirfs$ylable, "(prob.)", sep=" "))
-
-### Figure2E
+### Extended Data Fig.3e
+cmssdirfs <- SurvivalFGPlotSimplify(clin3, "dfs.delay", "dfs.event", "CRIS.TSP", Color=c("#EF4C2A", "#D42127", "#1C275C", "#018647", "#00AD9B"), type="months")
+plot_KMCurve(cmssdirfs$clin, cmssdirfs$labs, color=cmssdirfs$Color, font="Helvetica", xlab = "Follow-up (Months)", ylab = paste(cmssdirfs$ylable, "(prob.)", sep=" "))
+### Figure2a
 GetHGPlot <- function(atable, colname1, colname2, samplename){
 	SIAGCadj <- HyperGeoForTwoGroups(T90Clin=atable, GroupName1=colname1, GroupName2=colname2, Sample=samplename)
 	SIAGCtable <- as.data.frame.matrix(table(atable[, colname1], atable[, colname2]))
@@ -339,8 +308,7 @@ GetHGPlot <- function(atable, colname1, colname2, samplename){
 }
 GetHGPlot(atable=clin3, colname1="CMSPlus", colname2="CRIS.TSP", samplename="sample")
 
-
-####### Figure2F & FigureS3
+## Figure2b & Figure2f & Extended Data Fig.3f & Figure2g & Extended Data Fig.3g
 load("Normalized_Count_TCGA622.RData")
 options(stringsAsFactors  = F)
 suppressMessages(library(tidyverse))
@@ -358,14 +326,19 @@ load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/2.model/CRC.clin.ex
 cccrctcga <- read.table("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/5.otherclassifier/CCCRC_output.txt", header=T, sep="\t", quote="")
 identical(CRC.clin.exp.he_v2$sample, cccrctcga$id)
 CRC.clin.exp.he_v2$CCCRC <- cccrctcga$CCCRC_predict
-
-### FigureS3
+### Figure2f
 cmssdirfs <- SurvivalFGPlotSimplify(CRC.clin.exp.he_v2, "rfs.delay", "rfs.event", "CCCRC", Color=c("#72598D", "#FB9B03", "#FB0206", "#0765F7"), type="months")
 plot_KMCurve(cmssdirfs$clin, cmssdirfs$labs, color=cmssdirfs$Color, font="Helvetica", xlab = "Follow-up (Months)", ylab = paste(cmssdirfs$ylable, "(prob.)", sep=" "))
+### Extended Data Fig.3f
+cmssdirfs <- SurvivalFGPlotSimplify(CRC.clin.exp.he_v2, "dfs.delay", "dfs.event", "CCCRC", Color=c("#72598D", "#FB9B03", "#FB0206", "#0765F7"), type="months")
+plot_KMCurve(cmssdirfs$clin, cmssdirfs$labs, color=cmssdirfs$Color, font="Helvetica", xlab = "Follow-up (Months)", ylab = paste(cmssdirfs$ylable, "(prob.)", sep=" "))
+### Figure2g
 cmssdirfs <- SurvivalFGPlotSimplify(CRC.clin.exp.he_v2, "rfs.delay", "rfs.event", "RF.nearestCMS.mod", Color=c('#E69F24','#0273B3', '#CC79A7', '#009F73'), type="months")
 plot_KMCurve(cmssdirfs$clin, cmssdirfs$labs, color=cmssdirfs$Color, font="Helvetica", xlab = "Follow-up (Months)", ylab = paste(cmssdirfs$ylable, "(prob.)", sep=" "))
-
-### Figure2F
+### Extended Data Fig.3g
+cmssdirfs <- SurvivalFGPlotSimplify(CRC.clin.exp.he_v2, "dfs.delay", "dfs.event", "RF.nearestCMS.mod", Color=c('#E69F24','#0273B3', '#CC79A7', '#009F73'), type="months")
+plot_KMCurve(cmssdirfs$clin, cmssdirfs$labs, color=cmssdirfs$Color, font="Helvetica", xlab = "Follow-up (Months)", ylab = paste(cmssdirfs$ylable, "(prob.)", sep=" "))
+### Figure2b
 GetHGPlot <- function(atable, colname1, colname2, samplename){
 	SIAGCadj <- HyperGeoForTwoGroups(T90Clin=atable, GroupName1=colname1, GroupName2=colname2, Sample=samplename)
 	SIAGCtable <- as.data.frame.matrix(table(atable[, colname1], atable[, colname2]))
@@ -376,7 +349,7 @@ GetHGPlot <- function(atable, colname1, colname2, samplename){
 }
 GetHGPlot(atable=CRC.clin.exp.he_v2, colname1="CMSPlus", colname2="CCCRC", samplename="sample")
 
-####### Figure2GH
+## Figure2c & Figure2d
 setwd("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230606/5.otherclassifier")
 CCCRCids <- read.table("CCCRC_offical_label.txt", header=T, sep="\t", quote="")
 CRISids <- read.table("CRIS.label.txt", header=T, sep="\t", quote="", fill=T)
@@ -392,7 +365,7 @@ load("/data0/tan/Task/9.CMS.SDI/Procedures/StartFrom20230514/gsva.all.45.v2.RDat
 gsva.all.45.clin3 <- gsva.all.45[, CMSclin3$sample]
 col_fun2 = colorRamp2(unique(c(seq(-1, 0, length.out=18), seq(0, 1, length.out=18))), colorRampPalette(c("#1283E6", "#FFFFFF", "#FF8B00"))(35))
 
-### Figure2H
+### Figure2d
 CMSclin32 <- CMSclin3[order(CMSclin3$CCCRC), ]
 CCCRCha = HeatmapAnnotation(
     CCCRC = CMSclin32$CCCRC, 
@@ -406,7 +379,7 @@ CCCRCha = HeatmapAnnotation(
 CCCRChaP <- Heatmap(gsva.all.45.clin3[43:45, CMSclin32$sample], col = col_fun2, cluster_rows = FALSE, cluster_columns = FALSE, top_annotation = CCCRCha, column_labels=rep("", 1239))
 #draw(CCCRCha)
 
-### Figure2G
+### Figure2c
 CMSclin33 <- CMSclin3[order(CMSclin3$CRIS.TSP), ]
 CMSclin33 <- CMSclin33[CMSclin33$CRIS.TSP != "" & !is.na(CMSclin33$CRIS.TSP), ]
 CRISha = HeatmapAnnotation(
